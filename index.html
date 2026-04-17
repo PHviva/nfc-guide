@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viva.com — Guide NFC Tap to Pay</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{
+  --blue:#0055FF;--blue-lt:#E6EEFF;--blue-dk:#003DB3;
+  --green:#00A878;--green-lt:#E0F5EF;
+  --amber:#D97706;--amber-lt:#FEF3C7;
+  --red:#DC2626;--red-lt:#FEE2E2;
+  --ant-1:#DC2626;--ant-2:#00A878;--ant-3:#EAB308;
+  --g0:#FFFFFF;--g1:#F5F6F8;--g2:#ECEEF2;--g3:#D8DCE4;
+  --g4:#9CA3AF;--g5:#6B7280;--g6:#374151;--g7:#1F2937;--g8:#111827;
+  --f:'IBM Plex Sans',sans-serif;--fm:'IBM Plex Mono',monospace;
+  --r:10px;--r2:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--f);background:var(--g1);color:var(--g8);font-size:14px;line-height:1.5;}
+
+header{background:var(--g0);border-bottom:1px solid var(--g2);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;}
+.hlogo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;}
+.hlogo-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.htag{font-size:11px;font-weight:500;background:var(--blue-lt);color:var(--blue-dk);padding:3px 9px;border-radius:20px;letter-spacing:.02em;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px;}
+h1{font-size:22px;font-weight:600;margin-bottom:4px;}
+.sub{font-size:13px;color:var(--g5);margin-bottom:24px;}
+
+.sel-section{margin-bottom:18px;}
+.sel-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--g5);margin-bottom:8px;}
+.sel-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.brand-btn,.model-btn{
+  padding:6px 14px;border-radius:20px;border:1.5px solid var(--g3);
+  background:var(--g0);font-family:var(--f);font-size:13px;font-weight:500;
+  color:var(--g6);cursor:pointer;transition:all .12s;white-space:nowrap;
+}
+.brand-btn:hover,.model-btn:hover{border-color:var(--blue);color:var(--blue);}
+.brand-btn.active,.model-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.model-btn.star::after{content:' ★';font-size:10px;opacity:.85;}
+.model-search{flex:1;min-width:180px;max-width:300px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--g3);font-family:var(--f);font-size:13px;}
+.model-search:focus{outline:none;border-color:var(--blue);}
+.brand-count{font-size:11px;color:var(--g5);margin-left:6px;font-weight:400;}
+.brand-btn.active .brand-count{color:rgba(255,255,255,.75);}
+
+.main{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;}
+
+.pcard{background:var(--g0);border:1px solid var(--g2);border-radius:var(--r);padding:20px;}
+.pcard-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--g5);margin-bottom:14px;}
+.phone-stage{
+  position:relative;display:flex;justify-content:center;margin-bottom:16px;
+  background:var(--g1);border-radius:var(--r);padding:16px 12px;
+  min-height:440px;
+}
+.phone-inner{position:relative;}
+.phone-img{display:block;max-height:420px;width:auto;border-radius:8px;}
+.phone-img.fallback{background:var(--g0);border:1px dashed var(--g3);padding:30px;color:var(--g5);font-size:12px;text-align:center;width:200px;height:380px;display:flex;align-items:center;justify-content:center;}
+.ant-overlay{position:absolute;pointer-events:none;}
+.ant-overlay .ant-shape{
+  position:absolute;border-style:dashed;border-width:2.5px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.ant-overlay .ant-shape::before,
+.ant-overlay .ant-shape::after{
+  content:'';position:absolute;border-radius:50%;border-style:solid;border-width:1.5px;
+  left:50%;top:50%;transform:translate(-50%,-50%);
+}
+.ant-overlay .ant-shape::before{width:60%;height:60%;border-color:inherit;opacity:.35;}
+.ant-overlay .ant-shape::after{width:30%;height:30%;border-color:inherit;opacity:.6;}
+.ant-center-dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;}
+.ant-label{position:absolute;font-size:10px;font-weight:700;background:var(--g0);padding:2px 6px;border-radius:4px;white-space:nowrap;}
+
+.legend{display:flex;flex-direction:column;gap:9px;margin-bottom:14px;}
+.leg-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;margin-top:2px;}
+.leg-txt{color:var(--g7);line-height:1.4;}
+.leg-src{font-size:11px;color:var(--g5);margin-top:2px;}
+.tap-box{background:var(--green-lt);border:1px solid #9FE1CB;border-radius:var(--r2);padding:10px 12px;font-size:12px;color:#085041;line-height:1.5;}
+.tap-box b{font-weight:600;}
+.warn-box{background:var(--amber-lt);border:1px solid #FCD34D;border-radius:var(--r2);padding:10px 12px;font-size:12px;color:#633806;}
+.err-box{background:var(--red-lt);border:1px solid #FCA5A5;border-radius:var(--r2);padding:10px 12px;font-size:12px;color:#7F1D1D;}
+.na-box{background:var(--g1);border:1px dashed var(--g3);border-radius:var(--r2);padding:10px 12px;font-size:12px;color:var(--g5);}
+
+.ipanel{display:flex;flex-direction:column;gap:16px;}
+.icard{background:var(--g0);border:1px solid var(--g2);border-radius:var(--r);padding:18px 20px;}
+.icard-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--g5);margin-bottom:12px;}
+.score-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.score-name{font-size:17px;font-weight:600;}
+.sbadge{font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;}
+.sb-ex{background:var(--green-lt);color:#085041;}
+.sb-ok{background:var(--blue-lt);color:var(--blue-dk);}
+.sb-ko{background:var(--amber-lt);color:#633806;}
+.sb-bad{background:var(--red-lt);color:#7F1D1D;}
+.sb-na{background:var(--g1);color:var(--g5);}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.mbox{background:var(--g1);border-radius:var(--r2);padding:10px 12px;}
+.mlbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--g5);margin-bottom:3px;}
+.mval{font-size:14px;font-weight:600;color:var(--g8);}
+
+.chip-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--g1);border-radius:var(--r2);margin-bottom:10px;}
+.chip-ic{width:32px;height:32px;background:var(--g2);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chip-n{font-family:var(--fm);font-size:14px;font-weight:500;color:var(--g8);}
+.chip-s{font-size:11px;color:var(--g5);}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.sr{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--g1);}
+.sr:last-child{border-bottom:none;}
+.sk{color:var(--g5);font-size:12px;}
+.sv{font-weight:500;font-size:12px;color:var(--g8);}
+
+.ant-item{display:flex;gap:10px;padding:10px;background:var(--g1);border-radius:var(--r2);margin-bottom:8px;}
+.ant-item:last-child{margin-bottom:0;}
+.ant-num{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#fff;}
+.ant-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+.ant-detail{font-size:11px;color:var(--g5);line-height:1.4;}
+.conf-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:20px;margin-left:5px;font-weight:500;}
+.conf-v{background:#E0F5EF;color:#085041;}
+.conf-e{background:var(--amber-lt);color:#633806;}
+.conf-na{background:var(--g1);color:var(--g5);}
+
+.ctable-wrap{background:var(--g0);border:1px solid var(--g2);border-radius:var(--r);overflow:hidden;margin-top:20px;}
+.ctheader{padding:14px 20px;font-size:13px;font-weight:600;border-bottom:1px solid var(--g2);}
+table.ct{width:100%;border-collapse:collapse;}
+.ct th{background:var(--g1);padding:9px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--g5);border-bottom:1px solid var(--g2);}
+.ct td{padding:10px 12px;border-bottom:1px solid var(--g1);font-size:13px;vertical-align:middle;}
+.ct tr:last-child td{border-bottom:none;}
+.ct tr.cur td{background:#EFF3FF;}
+.ct tr{cursor:pointer;}
+.ct tr:hover td{background:var(--g1);}
+.ct tr.cur:hover td{background:#E6EEFF;}
+.pill{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.mono{font-family:var(--fm);font-size:11px;}
+
+.sources{font-size:11px;color:var(--g5);margin-top:16px;padding-top:12px;border-top:1px solid var(--g2);}
+.sources a{color:var(--g5);text-decoration:underline;}
+footer{text-align:center;padding:28px;font-size:11px;color:var(--g4);}
+
+@media(max-width:780px){
+  .main{grid-template-columns:1fr;}
+  .mgrid{grid-template-columns:1fr 1fr;}
+  .spec-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hlogo">
+    <div class="hlogo-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="5" stroke="#fff" stroke-width="1.5"/>
+        <circle cx="8" cy="8" r="2.5" stroke="#fff" stroke-width="1.2"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    Viva.com — Guide NFC
+  </div>
+  <span class="htag">Tap to Pay · Usage interne</span>
+</header>
+
+<div class="wrap">
+  <h1>Antenne NFC — Localisation exacte</h1>
+  <p class="sub">Sélectionnez la marque et le modèle du terminal pour identifier la zone de tap optimale sur tous les appareils supportés par Viva.com Tap to Pay.</p>
+
+  <div class="sel-section">
+    <div class="sel-label">Marque <span class="brand-count" id="total-brands"></span></div>
+    <div class="sel-row" id="brand-row"></div>
+  </div>
+  <div class="sel-section">
+    <div class="sel-label">Modèle <span class="brand-count" id="total-models"></span></div>
+    <div class="sel-row">
+      <input type="text" class="model-search" id="model-search" placeholder="Rechercher un modèle..." oninput="filterModels()">
+    </div>
+    <div class="sel-row" id="model-row" style="margin-top:8px;max-height:180px;overflow-y:auto;padding:4px 0;"></div>
+  </div>
+
+  <div class="main">
+    <div class="pcard">
+      <div class="pcard-label">Vue dos — photo officielle constructeur</div>
+      <div class="phone-stage" id="phone-stage"></div>
+      <div class="legend" id="legend"></div>
+      <div id="tap-msg"></div>
+    </div>
+    <div class="ipanel" id="ipanel"></div>
+  </div>
+
+  <div class="ctable-wrap">
+    <div class="ctheader" id="ctitle">Comparatif</div>
+    <div style="overflow-x:auto">
+      <table class="ct">
+        <thead>
+          <tr>
+            <th>Modèle</th>
+            <th>Puce NFC</th>
+            <th>Nb antennes</th>
+            <th>Position(s)</th>
+            <th>Fiabilité paiement</th>
+            <th>Recommandation</th>
+          </tr>
+        </thead>
+        <tbody id="ctbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sources" id="sources"></div>
+</div>
+
+<footer>Guide usage interne Viva.com · Sources images : GSMArena, Apple, Samsung · Sources NFC : Samsung HK NFC Support, GadgetGuideOnline, AndroidPolice, iFixit ChipID, TechInsights, Seritag, SamMobile, Cryptnox · Appareils supportés : document Viva.com "Supported Devices by Manufacturer / Model"</footer>
+
+<script>
+const DB = {
+  samsung: {
+    label: 'Samsung',
+    models: {
+      's26-ultra': {
+        label: 'Galaxy S26 Ultra', year: 2026, recommended: true,
+        image: 'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s26-ultra-5g-2.jpg',
+        chip: { name: 'NXP SN300U', gen: '3e gen NXP', node: '28nm TSMC', se: 'Intégré eSE', ccc: 'Oui (Rel.3)' },
+        score: 'excellent', scoreLabel: 'Excellent',
+        reliability: 'Très bonne', range: '3–5 cm', tapZones: 2,
+        dims: '78.1×163.6mm',
+        antennas: [
+          { id:1, label:'Antenne dos (bobine principale)', pos:'Tiers supérieur du dos — y≈28–70mm', size:'~58×44 mm', confidence:'confirmed',
+            source:'Samsung HK NFC Support · Android Police', overlay:{ top:'18%', left:'22%', width:'58%', height:'28%' } },
+          { id:2, label:'Antenne tranche haute (edge loop)', pos:'Tranche supérieure — top 35mm', size:'~68×5 mm', confidence:'confirmed',
+            source:'SamMobile · 9to5Google · Android Central', overlay:{ top:'-2%', left:'8%', width:'84%', height:'8%' } }
+        ],
+        tapInstruction: 'Deux zones actives : poser le <b>tiers supérieur du dos</b> (rouge) OU la <b>tranche supérieure</b> (vert).',
+        tapBox: 'ok',
+        sources: ['https://www.androidpolice.com/samsung-galaxy-s26-may-finally-fix-annoying-contactless-payment-issue/', 'https://www.sammobile.com/news/galaxy-s26-additional-nfc-antenna/']
+      },
+      's25-ultra': {
+        label: 'Galaxy S25 Ultra', year: 2025,
+        image: 'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s25-ultra-sm-s938-2.jpg',
+        chip: { name: 'NXP SN300', gen: '3e gen NXP (probable)', node: '28nm TSMC', se: 'Intégré eSE', ccc: 'Oui (Rel.3)' },
+        score: 'ko', scoreLabel: 'Problématique',
+        reliability: 'Mauvaise', range: '1–3 cm', tapZones: 1,
+        dims: '77.6×162.8mm',
+        antennas: [
+          { id:1, label:'Antenne dos', pos:'Tiers inférieur — y≈95–135mm', size:'~55×42 mm', confidence:'confirmed',
+            source:'Android Police · GadgetGuideOnline', overlay:{ top:'56%', left:'22%', width:'58%', height:'26%' } }
+        ],
+        tapInstruction: 'Poser le <b>tiers inférieur du dos</b> (rouge). Position contre-intuitive.',
+        tapBox: 'warn',
+        sources: ['https://gadgetguideonline.com/s25/layout-of-galaxy-s25-s25-and-s25-ultra/']
+      },
+      's24-ultra': {
+        label: 'Galaxy S24 Ultra', year: 2024,
+        image: 'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s24-ultra-2.jpg',
+        chip: { name: 'NXP SN300U', gen: '3e gen NXP', node: '28nm TSMC', se: 'Intégré eSE', ccc: 'Oui (Rel.3)' },
+        score: 'ok', scoreLabel: 'Bonne',
+        reliability: 'Bonne', range: '3–5 cm', tapZones: 1,
+        dims: '79.0×162.3mm',
+        antennas: [
+          { id:1, label:'Antenne dos', pos:'Tiers supérieur — y≈42–84mm', size:'~58×44 mm', confidence:'confirmed',
+            source:'GadgetGuideOnline S24', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }
+        ],
+        tapInstruction: 'Poser le <b>tiers supérieur du dos</b> (rouge). Position intuitive.',
+        tapBox: 'ok',
+        sources: ['https://gadgetguideonline.com/s24/layout-of-galaxy-s24-galaxy-s24-and-galaxy-s24-ultra/']
+      },
+      's23-ultra': {
+        label: 'Galaxy S23 Ultra', year: 2023,
+        image: 'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s23-ultra-5g-2.jpg',
+        chip: { name: 'NXP SN220U', gen: '2e gen NXP', node: '28nm TSMC', se: 'Intégré eSE', ccc: 'Oui (Rel.2)' },
+        score: 'bad', scoreLabel: 'Mauvaise',
+        reliability: 'Mauvaise', range: '2–4 cm', tapZones: 1,
+        dims: '78.1×163.4mm',
+        antennas: [
+          { id:1, label:'Antenne dos (co-localisée)', pos:'Centre du dos — y≈75–115mm', size:'~55×42 mm', confidence:'confirmed',
+            source:'GadgetGuideOnline S23 · Cryptnox', overlay:{ top:'44%', left:'22%', width:'58%', height:'26%' } }
+        ],
+        tapInstruction: 'Poser le <b>centre exact du dos</b> (rouge). Colocalisée avec bobine de charge — zone peu intuitive.',
+        tapBox: 'err',
+        sources: ['https://gadgetguideonline.com/s23/layout-of-galaxy-s23-s23-plus-s23-ultra/', 'https://cryptnox.com/phones-antennae-nfc/']
+      },
+      's24': { label:'Galaxy S24', year:2024, image:'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s24-2.jpg',
+        chip:{ name:'NXP SN300U', gen:'3e gen NXP', node:'28nm TSMC', se:'Intégré eSE', ccc:'Oui (Rel.3)' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'70.6×147×7.6mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut-centre dos, au-dessus bobine charge', size:'~55×40 mm estimé', confidence:'confirmed',
+          source:'GadgetGuideOnline S24 layout (identique série)', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge).', tapBox:'ok',
+        sources:['https://gadgetguideonline.com/s24/layout-of-galaxy-s24-galaxy-s24-and-galaxy-s24-ultra/'] },
+      's23': { label:'Galaxy S23', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s23-5g-2.jpg',
+        chip:{ name:'NXP SN220U', gen:'2e gen NXP', node:'28nm TSMC', se:'Intégré eSE', ccc:'Oui (Rel.2)' },
+        score:'bad', scoreLabel:'Mauvaise', reliability:'Mauvaise', range:'2–4 cm', tapZones:1, dims:'70.9×146.3×7.6mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Centre dos, colocalisée bobine de charge', size:'~55×40 mm estimé', confidence:'confirmed',
+          source:'GadgetGuideOnline S23 layout · Cryptnox', overlay:{ top:'44%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>centre du dos</b> (rouge).', tapBox:'err',
+        sources:['https://gadgetguideonline.com/s23/layout-of-galaxy-s23-s23-plus-s23-ultra/'] },
+      's22-ultra': { label:'Galaxy S22 Ultra', year:2022, image:'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s22-ultra-5g-2.jpg',
+        chip:{ name:'NXP SN220U', gen:'2e gen NXP', node:'28nm TSMC', se:'Intégré eSE', ccc:'Oui (Rel.2)' },
+        score:'ko', scoreLabel:'Moyenne', reliability:'Moyenne', range:'2–4 cm', tapZones:1, dims:'77.9×163.3×8.9mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut-centre dos (similaire S21)', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Samsung HK NFC Support', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge).', tapBox:'ok',
+        sources:['https://www.samsung.com/hk_en/nfc-support/'] },
+      'z-fold5': { label:'Galaxy Z Fold5', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-z-fold5-2.jpg',
+        chip:{ name:'NXP SN300', gen:'3e gen NXP', node:'28nm TSMC', se:'Intégré eSE', ccc:'Oui (Rel.3)' },
+        score:'ko', scoreLabel:'Moyenne', reliability:'Moyenne', range:'2–4 cm', tapZones:1, dims:'67.1×154.9×13.4mm plié',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Centre dos sur le panneau arrière', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Samsung HK NFC Support Z Fold5', overlay:{ top:'40%', left:'22%', width:'58%', height:'25%' } }],
+        tapInstruction:'Téléphone plié, poser le <b>dos de l\'écran principal</b> (rouge).', tapBox:'warn',
+        sources:['https://www.samsung.com/hk_en/nfc-support/'] },
+      'a54': { label:'Galaxy A54', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-a54-2.jpg',
+        chip:{ name:'NXP SN220U', gen:'2e gen NXP', node:'28nm TSMC', se:'Intégré eSE', ccc:'Oui (Rel.2)' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'76.7×158.2×8.2mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut-centre dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Samsung HK NFC Support A54', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge).', tapBox:'ok',
+        sources:['https://www.samsung.com/hk_en/nfc-support/'] }
+    }
+  },
+  apple: {
+    label: 'Apple',
+    models: {
+      'iphone-15-pro-max': { label:'iPhone 15 Pro Max', year:2023,
+        image:'https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-pro-max-2.jpg',
+        chip:{ name:'Apple NFC contrôleur', gen:'Interne Apple', node:'N/A', se:'Secure Enclave', ccc:'Oui (Digital Key)' },
+        score:'excellent', scoreLabel:'Excellent', reliability:'Très bonne', range:'3–5 cm', tapZones:1, dims:'76.7×159.9×8.25mm',
+        antennas:[{ id:1, label:'Antenne top edge', pos:'Tranche supérieure — top 20mm (comme tous les iPhone depuis iPhone 6)', size:'~70×4 mm (edge antenna)', confidence:'confirmed',
+          source:'Apple Developer Docs · Cryptnox NFC Guide',
+          overlay:{ top:'-2%', left:'8%', width:'84%', height:'10%' } }],
+        tapInstruction:'Poser la <b>tranche supérieure</b> de l\'iPhone (rouge) contre le terminal. Standard iPhone depuis 2014.', tapBox:'ok',
+        sources:['https://developer.apple.com/nfc/', 'https://cryptnox.com/phones-antennae-nfc/'] },
+      'iphone-15': { label:'iPhone 15', year:2023,
+        image:'https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-2.jpg',
+        chip:{ name:'Apple NFC contrôleur', gen:'Interne Apple', node:'N/A', se:'Secure Enclave', ccc:'Oui' },
+        score:'excellent', scoreLabel:'Excellent', reliability:'Très bonne', range:'3–5 cm', tapZones:1, dims:'71.6×147.6×7.8mm',
+        antennas:[{ id:1, label:'Antenne top edge', pos:'Tranche supérieure', size:'~65×4 mm (edge antenna)', confidence:'confirmed',
+          source:'Apple Developer Docs',
+          overlay:{ top:'-2%', left:'8%', width:'84%', height:'10%' } }],
+        tapInstruction:'Poser la <b>tranche supérieure</b> (rouge).', tapBox:'ok',
+        sources:['https://developer.apple.com/nfc/'] },
+      'iphone-14-pro-max': { label:'iPhone 14 Pro Max', year:2022,
+        image:'https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-14-pro-max-2.jpg',
+        chip:{ name:'Apple NFC contrôleur', gen:'Interne Apple', node:'N/A', se:'Secure Enclave', ccc:'Oui' },
+        score:'excellent', scoreLabel:'Excellent', reliability:'Très bonne', range:'3–5 cm', tapZones:1, dims:'77.6×160.7×7.85mm',
+        antennas:[{ id:1, label:'Antenne top edge', pos:'Tranche supérieure', size:'~70×4 mm', confidence:'confirmed',
+          source:'Apple Developer Docs',
+          overlay:{ top:'-2%', left:'8%', width:'84%', height:'10%' } }],
+        tapInstruction:'Poser la <b>tranche supérieure</b> (rouge).', tapBox:'ok',
+        sources:['https://developer.apple.com/nfc/'] },
+      'iphone-13': { label:'iPhone 13', year:2021,
+        image:'https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-13-2.jpg',
+        chip:{ name:'Apple NFC contrôleur', gen:'Interne Apple', node:'N/A', se:'Secure Enclave', ccc:'Oui' },
+        score:'excellent', scoreLabel:'Excellent', reliability:'Très bonne', range:'3–5 cm', tapZones:1, dims:'71.5×146.7×7.65mm',
+        antennas:[{ id:1, label:'Antenne top edge', pos:'Tranche supérieure', size:'~65×4 mm', confidence:'confirmed',
+          source:'Apple Developer Docs · Cryptnox', overlay:{ top:'-2%', left:'8%', width:'84%', height:'10%' } }],
+        tapInstruction:'Poser la <b>tranche supérieure</b> (rouge).', tapBox:'ok',
+        sources:['https://cryptnox.com/phones-antennae-nfc/'] },
+      'iphone-12': { label:'iPhone 12', year:2020,
+        image:'https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-12-2.jpg',
+        chip:{ name:'Apple NFC contrôleur', gen:'Interne Apple', node:'N/A', se:'Secure Enclave', ccc:'Oui' },
+        score:'excellent', scoreLabel:'Excellent', reliability:'Très bonne', range:'3–5 cm', tapZones:1, dims:'71.5×146.7×7.4mm',
+        antennas:[{ id:1, label:'Antenne top edge', pos:'Tranche supérieure', size:'~65×4 mm', confidence:'confirmed',
+          source:'Apple Developer Docs', overlay:{ top:'-2%', left:'8%', width:'84%', height:'10%' } }],
+        tapInstruction:'Poser la <b>tranche supérieure</b> (rouge).', tapBox:'ok',
+        sources:['https://developer.apple.com/nfc/'] },
+      'iphone-se-2020': { label:'iPhone SE (2020)', year:2020,
+        image:'https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-se-2020-2.jpg',
+        chip:{ name:'Apple NFC contrôleur', gen:'Interne Apple', node:'N/A', se:'Secure Enclave', ccc:'Oui' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'67.3×138.4×7.3mm',
+        antennas:[{ id:1, label:'Antenne top edge', pos:'Tranche supérieure', size:'~60×4 mm', confidence:'confirmed',
+          source:'Apple Developer Docs', overlay:{ top:'-2%', left:'8%', width:'84%', height:'10%' } }],
+        tapInstruction:'Poser la <b>tranche supérieure</b> (rouge).', tapBox:'ok',
+        sources:['https://developer.apple.com/nfc/'] }
+    }
+  },
+  google: {
+    label: 'Google',
+    models: {
+      'pixel-8-pro': { label:'Pixel 8 Pro', year:2023,
+        image:'https://fdn2.gsmarena.com/vv/pics/google/google-pixel-8-pro-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Titan M2', ccc:'Oui' },
+        score:'excellent', scoreLabel:'Excellent', reliability:'Très bonne', range:'3–5 cm', tapZones:1, dims:'76.5×162.6×8.8mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Tiers supérieur dos, sous la barre caméra', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Cryptnox NFC Guide : "NFC area 3 (top area)"',
+          overlay:{ top:'18%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge), juste sous la barre caméra.', tapBox:'ok',
+        sources:['https://cryptnox.com/phones-antennae-nfc/'] },
+      'pixel-8': { label:'Pixel 8', year:2023,
+        image:'https://fdn2.gsmarena.com/vv/pics/google/google-pixel-8-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Titan M2', ccc:'Oui' },
+        score:'excellent', scoreLabel:'Excellent', reliability:'Très bonne', range:'3–5 cm', tapZones:1, dims:'70.8×150.5×8.9mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Tiers supérieur dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Cryptnox NFC Guide', overlay:{ top:'18%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge).', tapBox:'ok',
+        sources:['https://cryptnox.com/phones-antennae-nfc/'] },
+      'pixel-7-pro': { label:'Pixel 7 Pro', year:2022,
+        image:'https://fdn2.gsmarena.com/vv/pics/google/google-pixel-7-pro-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Titan M2', ccc:'Oui' },
+        score:'ko', scoreLabel:'Moyenne', reliability:'Moyenne', range:'2–4 cm', tapZones:1, dims:'76.6×162.9×8.9mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Centre dos (plus bas que Pixel 8)', size:'~55×40 mm estimé', confidence:'confirmed',
+          source:'Cryptnox NFC Guide : "NFC area 2 (middle section)"',
+          overlay:{ top:'40%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>centre du dos</b> (rouge).', tapBox:'warn',
+        sources:['https://cryptnox.com/phones-antennae-nfc/'] },
+      'pixel-7': { label:'Pixel 7', year:2022, image:'https://fdn2.gsmarena.com/vv/pics/google/google-pixel-7-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Titan M2', ccc:'Oui' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'73.2×155.6×8.7mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Cryptnox NFC Guide', overlay:{ top:'18%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>haut du dos</b> (rouge).', tapBox:'ok',
+        sources:['https://cryptnox.com/phones-antennae-nfc/'] },
+      'pixel-6-pro': { label:'Pixel 6 Pro', year:2021, image:'https://fdn2.gsmarena.com/vv/pics/google/google-pixel-6-pro-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Titan M2', ccc:'Oui' },
+        score:'ko', scoreLabel:'Moyenne', reliability:'Moyenne', range:'2–4 cm', tapZones:1, dims:'75.9×163.9×8.9mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Milieu dos', size:'~55×40 mm estimé', confidence:'confirmed',
+          source:'Cryptnox NFC Guide : "NFC area 2 (middle section)"',
+          overlay:{ top:'40%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>milieu du dos</b> (rouge).', tapBox:'warn',
+        sources:['https://cryptnox.com/phones-antennae-nfc/'] }
+    }
+  },
+  oneplus: {
+    label: 'OnePlus',
+    models: {
+      'oneplus-12': { label:'OnePlus 12', year:2024, image:'https://fdn2.gsmarena.com/vv/pics/oneplus/oneplus-12-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'75.8×164.3×9.2mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut-centre dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Observations constructeur', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge).', tapBox:'ok',
+        sources:[] },
+      'oneplus-11': { label:'OnePlus 11', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/oneplus/oneplus-11-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'74.1×163.1×8.5mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut-centre dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Observations constructeur', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge).', tapBox:'ok',
+        sources:[] },
+      'oneplus-open': { label:'OnePlus Open', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/oneplus/oneplus-open-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ko', scoreLabel:'Moyenne', reliability:'Moyenne', range:'2–4 cm', tapZones:1, dims:'73.3×153.4×11.7mm plié',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Près du module caméra', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Observations constructeur', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Pli sur le <b>dos</b>, près du module caméra.', tapBox:'warn',
+        sources:[] }
+    }
+  },
+  xiaomi: {
+    label: 'Xiaomi',
+    models: {
+      'xiaomi-14': { label:'Xiaomi 14', year:2024, image:'https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-14-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'71.5×152.8×8.2mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut dos près du module caméra', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Observations constructeur', overlay:{ top:'18%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>haut du dos</b> (rouge).', tapBox:'ok',
+        sources:[] },
+      'xiaomi-13-pro': { label:'Xiaomi 13 Pro', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-13-pro-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'74.6×162.9×8.4mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Observations constructeur', overlay:{ top:'18%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>haut du dos</b> (rouge).', tapBox:'ok',
+        sources:[] }
+    }
+  },
+  sony: {
+    label: 'Sony',
+    models: {
+      'xperia-1-v': { label:'Xperia 1 V', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/sony/sony-xperia-1-v-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'71×165×8.3mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut dos (marquage « N » visible)', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Sony Support', overlay:{ top:'18%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>haut du dos</b> (rouge), Sony marque souvent la zone d\'un logo N.', tapBox:'ok',
+        sources:[] },
+      'xperia-5-v': { label:'Xperia 5 V', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/sony/sony-xperia-5-v-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'68×154×8.6mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Sony Support', overlay:{ top:'18%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>haut du dos</b> (rouge).', tapBox:'ok',
+        sources:[] }
+    }
+  },
+  motorola: {
+    label: 'Motorola',
+    models: {
+      'edge-40-pro': { label:'Edge 40 Pro', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/motorola/motorola-edge-40-pro-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'73.3×161.2×8.6mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Haut-centre dos', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Observations constructeur', overlay:{ top:'22%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>tiers supérieur du dos</b> (rouge).', tapBox:'ok',
+        sources:[] }
+    }
+  },
+  nothing: {
+    label: 'Nothing',
+    models: {
+      'phone-2': { label:'Phone (2)', year:2023, image:'https://fdn2.gsmarena.com/vv/pics/nothing/nothing-phone-2-2.jpg',
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'76.4×162.1×8.6mm',
+        antennas:[{ id:1, label:'Antenne dos', pos:'Centre dos (derrière Glyph)', size:'~55×40 mm estimé', confidence:'estimated',
+          source:'Observations constructeur', overlay:{ top:'40%', left:'22%', width:'58%', height:'26%' } }],
+        tapInstruction:'Poser le <b>centre du dos</b> (rouge).', tapBox:'ok',
+        sources:[] }
+    }
+  },
+  sunmi: {
+    label: 'Sunmi',
+    models: {
+      'v2s': { label:'Sunmi V2S', year:2022, image:null,
+        chip:{ name:'NXP (probable)', gen:'Non publié', node:'Non publié', se:'Intégré', ccc:'N/A' },
+        score:'ok', scoreLabel:'Bonne', reliability:'Bonne', range:'3–5 cm', tapZones:1, dims:'Handheld POS',
+        antennas:[{ id:1, label:'Antenne dos POS', pos:'Milieu dos du terminal', size:'N/A', confidence:'na',
+          source:'Documentation Sunmi', overlay:null }],
+        tapInstruction:'Approcher la <b>carte bancaire du dos</b> du terminal Sunmi.', tapBox:'ok',
+        sources:[] }
+    }
+  }
+};
+
+const ANT_COLORS = [
+  { stroke:'#DC2626', bg:'rgba(220,38,38,0.15)', text:'#7F1D1D', light:'#FEE2E2' },
+  { stroke:'#00A878', bg:'rgba(0,168,120,0.22)', text:'#085041', light:'#E0F5EF' },
+  { stroke:'#EAB308', bg:'rgba(234,179,8,0.22)', text:'#713F12', light:'#FEF3C7' }
+];
+
+const scoreMap = {
+  excellent:{ badge:'sb-ex', pill:'background:#E0F5EF;color:#085041' },
+  ok:{ badge:'sb-ok', pill:'background:#E6EEFF;color:#003DB3' },
+  ko:{ badge:'sb-ko', pill:'background:#FEF3C7;color:#633806' },
+  bad:{ badge:'sb-bad', pill:'background:#FEE2E2;color:#7F1D1D' }
+};
+
+let curBrand = 'samsung';
+let curModel = 's26-ultra';
+let modelFilter = '';
+
+function buildBrandRow(){
+  const el = document.getElementById('brand-row');
+  el.innerHTML = Object.entries(DB).map(([k,v])=>{
+    const count = Object.keys(v.models).length;
+    return `<button class="brand-btn ${k===curBrand?'active':''}" onclick="selectBrand('${k}')">${v.label}<span class="brand-count">${count}</span></button>`;
+  }).join('');
+  const totalBrands = Object.keys(DB).length;
+  const totalModels = Object.values(DB).reduce((s,b)=>s+Object.keys(b.models).length, 0);
+  document.getElementById('total-brands').textContent = `(${totalBrands} marques)`;
+  document.getElementById('total-models').textContent = `(${totalModels} modèles au total)`;
+}
+
+function buildModelRow(){
+  const el = document.getElementById('model-row');
+  const models = DB[curBrand].models;
+  const filter = modelFilter.toLowerCase();
+  el.innerHTML = Object.entries(models)
+    .filter(([k,v]) => !filter || v.label.toLowerCase().includes(filter))
+    .map(([k,v])=>
+      `<button class="model-btn ${v.recommended?'star':''} ${k===curModel?'active':''}" onclick="selectModel('${k}')">${v.label} <span style="opacity:.55;font-size:11px">${v.year}</span></button>`
+    ).join('');
+}
+
+function filterModels(){
+  modelFilter = document.getElementById('model-search').value;
+  buildModelRow();
+}
+
+function renderPhone(model){
+  const stage = document.getElementById('phone-stage');
+  if(!model.image){
+    stage.innerHTML = `<div class="phone-img fallback">Image constructeur non disponible pour ce modèle</div>`;
+    return;
+  }
+  const overlays = model.antennas.map((a, idx) => {
+    if(!a.overlay) return '';
+    const c = ANT_COLORS[idx] || ANT_COLORS[0];
+    const o = a.overlay;
+    return `<div class="ant-shape" style="
+      top:${o.top};left:${o.left};width:${o.width};height:${o.height};
+      border-color:${c.stroke};background:${c.bg};color:${c.stroke};">
+      <div class="ant-center-dot" style="background:${c.stroke}"></div>
+      <div class="ant-label" style="color:${c.stroke};bottom:4px;right:4px;border:1px solid ${c.stroke}">NFC ${a.id}</div>
+    </div>`;
+  }).join('');
+
+  stage.innerHTML = `
+    <div class="phone-inner" id="phone-inner">
+      <img class="phone-img" src="${model.image}" alt="${model.label}" id="phone-img-el"
+           onerror="this.onerror=null; this.outerHTML='<div class=\\'phone-img fallback\\'>Image non chargée — vérifier la connexion ou l\\'URL</div>'">
+      <div class="ant-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;">${overlays}</div>
+    </div>`;
+
+  setTimeout(() => {
+    const img = document.getElementById('phone-img-el');
+    const inner = document.getElementById('phone-inner');
+    if(img && inner && img.complete && img.naturalWidth > 0){
+      inner.style.width = img.clientWidth + 'px';
+      inner.style.height = img.clientHeight + 'px';
+    }
+  }, 200);
+}
+
+function render(){
+  buildBrandRow();
+  buildModelRow();
+
+  const brand = DB[curBrand];
+  const model = brand.models[curModel];
+  if(!model){ return; }
+
+  renderPhone(model);
+
+  document.getElementById('legend').innerHTML = model.antennas.map((a, idx) => {
+    const c = ANT_COLORS[idx] || ANT_COLORS[0];
+    const conf = a.confidence === 'confirmed' ? 'conf-v' : a.confidence === 'estimated' ? 'conf-e' : 'conf-na';
+    const confTxt = a.confidence === 'confirmed' ? 'Confirmé' : a.confidence === 'estimated' ? 'Estimé' : 'N/A';
+    return `<div class="leg-row">
+      <div class="leg-dot" style="background:${c.stroke}"></div>
+      <div>
+        <div class="leg-txt"><b>NFC ${a.id} — ${a.label}</b></div>
+        <div class="leg-txt">${a.pos}</div>
+        <div class="leg-src">Taille : ${a.size}
+          <span class="conf-badge ${conf}">${confTxt}</span><br>${a.source}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const boxCls = model.tapBox === 'ok' ? 'tap-box' : model.tapBox === 'warn' ? 'warn-box' : model.tapBox === 'err' ? 'err-box' : 'na-box';
+  document.getElementById('tap-msg').innerHTML =
+    `<div class="${boxCls}"><b>Comment faire le tap :</b> ${model.tapInstruction}</div>`;
+
+  const sm = scoreMap[model.score] || scoreMap.ok;
+  document.getElementById('ipanel').innerHTML = `
+    <div class="icard">
+      <div class="icard-title">Évaluation Tap to Pay</div>
+      <div class="score-row">
+        <span class="score-name">${brand.label} ${model.label}</span>
+        <span class="sbadge ${sm.badge}">${model.scoreLabel}</span>
+      </div>
+      <div class="mgrid">
+        <div class="mbox"><div class="mlbl">Zones de tap</div><div class="mval">${model.tapZones}</div></div>
+        <div class="mbox"><div class="mlbl">Portée pratique</div><div class="mval">${model.range}</div></div>
+        <div class="mbox"><div class="mlbl">Dimensions</div><div class="mval" style="font-size:10px;font-family:var(--fm)">${model.dims}</div></div>
+      </div>
+    </div>
+    <div class="icard">
+      <div class="icard-title">Puce NFC</div>
+      <div class="chip-row">
+        <div class="chip-ic">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="4" y="4" width="10" height="10" rx="2" stroke="#6B7280" stroke-width="1.3"/>
+            <rect x="7" y="7" width="4" height="4" rx="1" fill="#6B7280"/>
+          </svg>
+        </div>
+        <div>
+          <div class="chip-n">${model.chip.name}</div>
+          <div class="chip-s">${model.chip.gen}</div>
+        </div>
+      </div>
+      <div class="spec-grid">
+        <div>
+          <div class="sr"><span class="sk">Nœud</span><span class="sv">${model.chip.node}</span></div>
+          <div class="sr"><span class="sk">Secure Element</span><span class="sv">${model.chip.se}</span></div>
+        </div>
+        <div>
+          <div class="sr"><span class="sk">Fréquence</span><span class="sv">13,56 MHz</span></div>
+          <div class="sr"><span class="sk">CCC Digital Key</span><span class="sv">${model.chip.ccc}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="icard">
+      <div class="icard-title">Antenne(s) — données physiques</div>
+      ${model.antennas.map((a,idx)=>{
+        const c = ANT_COLORS[idx] || ANT_COLORS[0];
+        const conf = a.confidence === 'confirmed' ? 'conf-v' : a.confidence === 'estimated' ? 'conf-e' : 'conf-na';
+        const confTxt = a.confidence === 'confirmed' ? 'Confirmé' : a.confidence === 'estimated' ? 'Estimé' : 'N/A';
+        return `<div class="ant-item">
+          <div class="ant-num" style="background:${c.stroke}">${a.id}</div>
+          <div>
+            <div class="ant-name">NFC ${a.id} — ${a.label}</div>
+            <div class="ant-detail">${a.pos}</div>
+            <div class="ant-detail" style="margin-top:3px">Taille : <b>${a.size}</b>
+              <span class="conf-badge ${conf}">${confTxt}</span>
+            </div>
+            <div class="ant-detail" style="margin-top:2px;font-style:italic">Source : ${a.source}</div>
+          </div>
+        </div>`;}).join('')}
+      <div style="font-size:11px;color:var(--g5);margin-top:8px;padding-top:8px;border-top:1px solid var(--g2);">
+        Codage couleurs antennes : <span style="color:#DC2626;font-weight:600">rouge</span>=n°1 · <span style="color:#00A878;font-weight:600">verte</span>=n°2 · <span style="color:#EAB308;font-weight:600">jaune</span>=n°3.
+      </div>
+    </div>
+  `;
+
+  document.getElementById('ctitle').textContent = `Comparatif ${brand.label} — ${Object.keys(brand.models).length} modèle(s)`;
+  document.getElementById('ctbody').innerHTML = Object.entries(brand.models).map(([k,m])=>{
+    const sm2 = scoreMap[m.score] || scoreMap.ok;
+    const isCur = k === curModel;
+    const posSummary = m.antennas.map(a => a.pos.split(/[—,]/)[0].trim()).join(' · ');
+    return `<tr class="${isCur?'cur':''}" onclick="selectModel('${k}')">
+      <td><span style="font-weight:${isCur?'600':'400'}">${m.label}</span>
+        ${m.recommended?`<span class="pill" style="background:var(--blue-lt);color:var(--blue-dk);margin-left:5px">★</span>`:''}
+        ${isCur?`<span class="pill" style="background:var(--g8);color:#fff;margin-left:4px">Sélectionné</span>`:''}</td>
+      <td class="mono">${m.chip.name}</td>
+      <td style="text-align:center;font-weight:500">${m.tapZones}</td>
+      <td style="font-size:12px">${posSummary}</td>
+      <td><span class="pill" style="${sm2.pill}">${m.scoreLabel}</span></td>
+      <td style="font-size:12px;color:${m.recommended?'var(--green)':m.score==='ok'||m.score==='excellent'?'var(--g6)':'var(--amber)'}">
+        ${m.recommended?'Privilégier':m.score==='excellent'?'Excellent':m.score==='ok'?'Acceptable':m.score==='ko'?'Attention':'Déconseillé'}</td>
+    </tr>`;
+  }).join('');
+
+  const allSrcs = model.sources || [];
+  document.getElementById('sources').innerHTML = allSrcs.length ? (`Sources pour ce modèle : ` +
+    allSrcs.map(u=>`<a href="${u}" target="_blank">${u.replace('https://','').split('/')[0]}</a>`).join(' · ')) : '';
+}
+
+function selectBrand(b){
+  curBrand = b;
+  curModel = Object.keys(DB[b].models)[0];
+  modelFilter = '';
+  const ms = document.getElementById('model-search');
+  if(ms) ms.value = '';
+  render();
+}
+function selectModel(m){ curModel = m; render(); }
+
+render();
+</script>
+</body>
+</html>
