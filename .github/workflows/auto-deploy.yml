@@ -36,20 +36,25 @@ jobs:
       - name: Update NFC data (weekly/manual only)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python update_nfc_data.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Commit & push if changed
+      - name: Commit updated data if changed
         run: |
           git config user.email "bot@github.com"
           git config user.name "NFC Guide Bot"
-          git add index.html
-          git diff --cached --quiet || git commit -m "chore: auto-update NFC data $(date +%Y-%m-%d)"
+          git add data.js || true
+          git diff --cached --quiet || git commit -m "chore: update NFC data $(date +%Y-%m-%d)"
           git push || true
 
-      - uses: actions/configure-pages@v5
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload
+        uses: actions/upload-pages-artifact@v3
         with:
           path: "."
 
-      - id: deployment
+      - name: Deploy
+        id: deployment
         uses: actions/deploy-pages@v4
